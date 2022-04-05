@@ -1,51 +1,54 @@
 #include "mandelbrot.h"
 
-int main () {
+enum DEFAULT_SIZE {
+	SZX = 960,
+	SZY = 540
+};
 
-	GLFWwindow *window = initialize_window();
+int WIDTH = SZX;
+int HEIGHT = SZY;
+int scope = 1;
 
-	float point[9] = {
-		1.0f, 0.0f, 0.0f, 
-		0.0f, -1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f};
-	size_t npoints = 3;
+#define C_re re * 2 / WIDTH - 1
+#define C_im im * 2 / HEIGHT - 1
 
-	unsigned int bufID;
-	glGenBuffers (1, &bufID);
-	glBindBuffer (GL_ARRAY_BUFFER, bufID);
-	glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (float), point, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray (0);
-	glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	while (!glfwWindowShouldClose (window)) {
-		do_render (point, npoints);
-    	glfwSwapBuffers (window);
-    	glfwPollEvents ();
-	}
-
-	glfwTerminate ();
-	exit (EXIT_SUCCESS);
-}
-
-
-void do_render (float *point, size_t n) {
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+void do_render (size_t iterations) {
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBegin(GL_POINTS);
-		glColor3f(1.0, 1.0, 1.0);
-		for (size_t i = 0; i < n; i++)
-			glVertex3fv(point + 3 * i);
+		for (float re = 0; re < WIDTH; re += 1 / scope) {
+			for (float im = 0; im < HEIGHT; im += 1 / scope) {
+				float x = 0, y = 0;
+				float x_tmp = 0, y_tmp = 0;
+				size_t iter = 0;
+				while (iter < iterations && x * x + y * y < 2) {
+					x_tmp = x * x - y * y + C_re;
+					y_tmp = 2 * x * y + C_im;
+					x = x_tmp;
+					y = y_tmp;
+					iter++;
+				}
+
+				float r = 0.3 + iter / (2 * iterations);
+				float g = 0.3 + iter / (1.5 * iterations);
+				float b = 0.3 + iter / (3 * iterations);
+
+				glColor3f(r, g, b);
+				glVertex2d(re * 2 / WIDTH - 1, im * 2 / HEIGHT - 1);
+			}
+		}
 	glEnd();
 	return;
 }
 
 void framebuffer_size_callback (GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
+	glfwGetWindowSize (window, &WIDTH, &HEIGHT);
+	return;
 }
 
-GLFWwindow *initialize_window() {
+GLFWwindow *initialize_window () {
 	GLFWwindow *Window;
 	if (!glfwInit ())
 		exit (EXIT_FAILURE);
