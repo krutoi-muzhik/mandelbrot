@@ -4,7 +4,7 @@ enum DEFAULT_VALS {
 	SZX = 960,
 	SZY = 540,
 	ITERS = 200,
-	ZOOM = 100
+	ZOOM = 1000
 };
 
 int WIDTH = SZX;
@@ -13,18 +13,18 @@ double zoom = ZOOM;
 int dragging = 0;
 double offsetX = 0.0, offsetY = 0.0;
 double posX = 0.0, posY = 0;
-int iterations = ITERS;
+size_t iterations = ITERS;
 
-#define C_re re * 2 / WIDTH - 1
-#define C_im im * 2 / HEIGHT - 1
+#define C_re re * 100 / zoom
+#define C_im im * 100 / zoom
 
 void do_render () {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBegin(GL_POINTS);
-		for (float re = 0; re < WIDTH; re += 1 / scope) {
-			for (float im = 0; im < HEIGHT; im += 1 / scope) {
+		for (float re = offsetX - WIDTH / 2; re < offsetX + WIDTH / 2; re ++) {
+			for (float im = offsetY + HEIGHT / 2; im > offsetY - HEIGHT / 2; im --) {
 				float x = 0, y = 0;
 				float x_tmp = 0, y_tmp = 0;
 				size_t iter = 0;
@@ -36,12 +36,20 @@ void do_render () {
 					iter++;
 				}
 
+				// printf ("offsetX = %lf, offsetY = %lf\n", offsetX, offsetY);
+
+				// printf ("C_re = %lf, C_im = %lf\n", C_re, C_im);
+
+				// printf ("x = %lf, y = %lf, iter = %d\n", re, im, iter);
+
 				float r = 0.0 + iter / (5 * iterations);
 				float g = 0.1 - iter / (3 * iterations);
 				float b = 0.3 + iter / (1.5 * iterations);
 
 				glColor3f(r, g, b);
-				glVertex2d(re * 2 / WIDTH - 1, im * 2 / HEIGHT - 1);
+
+				// printf ("x = %lf y = %lf\n", (re - offsetX) * 2 / WIDTH - 1, (offsetY - im) * 2 / HEIGHT - 1);
+				glVertex2d((re - offsetX) * 2 / WIDTH - 1, (offsetY - im) * 2 / HEIGHT - 1);
 			}
 		}
 	glEnd();
@@ -71,10 +79,10 @@ GLFWwindow *initialize_window () {
 		exit (EXIT_FAILURE);
 	}
 	glfwSetFramebufferSizeCallback (Window, framebuffer_size_callback);
-	glfwSetKeyCallback(window, key_callback);
-	glfwSetCursorPosCallback(window, cursor_position_callback);
-	glfwSetMouseButtonCallback(window, mouse_button_callback);
-	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetKeyCallback(Window, key_callback);
+	glfwSetCursorPosCallback(Window, cursor_position_callback);
+	glfwSetMouseButtonCallback(Window, mouse_button_callback);
+	glfwSetScrollCallback(Window, scroll_callback);
 	return Window;
 }
 
@@ -93,8 +101,8 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
-		offsetX += (xpos - posX) / zoom;
-		offsetY += (ypos - posY) / zoom;
+		offsetX -= (xpos - posX);
+		offsetY -= (ypos - posY);
 
 		posX = xpos;
 		posY = ypos;
