@@ -1,21 +1,24 @@
 #include "mandelbrot.h"
 
-enum DEFAULT_SIZE {
+enum DEFAULT_VALS {
 	SZX = 960,
-	SZY = 540
+	SZY = 540,
+	ITERS = 200,
+	ZOOM = 100
 };
 
 int WIDTH = SZX;
 int HEIGHT = SZY;
-double zoom = 100.0;
+double zoom = ZOOM;
 int dragging = 0;
-double offsetX = 0.0;
-double offsetY = 0.0;
+double offsetX = 0.0, offsetY = 0.0;
+double posX = 0.0, posY = 0;
+int iterations = ITERS;
 
 #define C_re re * 2 / WIDTH - 1
 #define C_im im * 2 / HEIGHT - 1
 
-void do_render (size_t iterations) {
+void do_render () {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -77,7 +80,7 @@ GLFWwindow *initialize_window () {
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-		glfwGetCursorPos(window, &oldX, &oldY);
+		glfwGetCursorPos(window, &posX, &posY);
 		dragging = 1;
 	}
 	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
@@ -90,11 +93,11 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
-		offsetX += (xpos - oldX) / zoom;
-		offsetY += (oldY - ypos) / zoom;
+		offsetX += (xpos - posX) / zoom;
+		offsetY += (ypos - posY) / zoom;
 
-		oldX = xpos;
-		oldY = ypos;
+		posX = xpos;
+		posY = ypos;
 	}
 	return;
 }
@@ -105,18 +108,51 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 		glfwGetCursorPos(window, &xpos, &ypos);
 
 		double dx = (xpos - WIDTH / 2) / zoom - offsetX;
-		double dy = (HEIGHT - ypos - HEIGHT / 2) / zoom - offsetY;
+		double dy = (ypos - HEIGHT / 2) / zoom - offsetY;
 		offsetX = -dx;
 		offsetY = -dy;
+
 		if (yoffset < 0)
 			zoom /= 1.2;
 		else
 			zoom *= 1.2;
 
 		dx = (xpos - WIDTH / 2) / zoom;
-		dy = (HEIGHT - ypos - HEIGHT / 2) / zoom;
+		dy = (ypos - HEIGHT / 2) / zoom;
 		offsetX += dx;
 		offsetY += dy;
 	}
 	return;
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, 1);
+	}
+
+	if (key == GLFW_KEY_KP_0 && action == GLFW_PRESS) {
+		iterations = ITERS;
+		zoom = ZOOM;
+		offsetX = 0.0;
+		offsetY = 0.0;
+	}
+
+	if (key == GLFW_KEY_A && action == GLFW_PRESS)
+		offsetX += 20 / zoom;
+	else if (key == GLFW_KEY_D && action == GLFW_PRESS)
+		offsetX -= 20 / zoom;
+	else if (key == GLFW_KEY_W && action == GLFW_PRESS)
+		offsetY += 20 / zoom;
+	else if (key == GLFW_KEY_S && action == GLFW_PRESS)
+		offsetY -= 20 / zoom;
+
+	if (key == GLFW_KEY_KP_ADD && action == GLFW_PRESS)
+		zoom *= 2;
+	else if (key == GLFW_KEY_KP_SUBTRACT && action == GLFW_PRESS)
+		zoom /= 2;
+
+	if (key == GLFW_KEY_Q && action == GLFW_PRESS)
+		iterations += 50;
+	else if (key == GLFW_KEY_E && action == GLFW_PRESS && iterations >= 100)
+		iterations -= 50;
 }
