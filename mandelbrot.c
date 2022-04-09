@@ -11,7 +11,7 @@ int WIDTH = SZX;
 int HEIGHT = SZY;
 double zoom = ZOOM;
 int dragging = 0;
-double offsetX = 0.0, offsetY = 0.0;
+double offsetX = -480.0, offsetY = 270.0;
 double posX = 0.0, posY = 0;
 size_t iterations = ITERS;
 
@@ -23,8 +23,8 @@ void do_render () {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBegin(GL_POINTS);
-		for (float re = offsetX - WIDTH / 2; re < offsetX + WIDTH / 2; re ++) {
-			for (float im = offsetY + HEIGHT / 2; im > offsetY - HEIGHT / 2; im --) {
+		for (float re = offsetX; re < offsetX + WIDTH; re ++) {
+			for (float im = offsetY; im > offsetY - HEIGHT; im --) {
 				float x = 0, y = 0;
 				float x_tmp = 0, y_tmp = 0;
 				size_t iter = 0;
@@ -115,8 +115,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
-		double dx = (xpos - WIDTH / 2) / zoom - offsetX;
-		double dy = (ypos - HEIGHT / 2) / zoom - offsetY;
+		double dx = (xpos - WIDTH / 2) - offsetX;
+		double dy = (ypos - HEIGHT / 2) - offsetY;
 		offsetX = -dx;
 		offsetY = -dy;
 
@@ -127,8 +127,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 
 		dx = (xpos - WIDTH / 2) / zoom;
 		dy = (ypos - HEIGHT / 2) / zoom;
-		offsetX += dx;
-		offsetY += dy;
+		offsetX -= dx;
+		offsetY -= dy;
 	}
 	return;
 }
@@ -146,13 +146,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 
 	if (key == GLFW_KEY_A && action == GLFW_PRESS)
-		offsetX += 20 / zoom;
+		offsetX -= WIDTH / 5;
 	else if (key == GLFW_KEY_D && action == GLFW_PRESS)
-		offsetX -= 20 / zoom;
+		offsetX += WIDTH / 5;
 	else if (key == GLFW_KEY_W && action == GLFW_PRESS)
-		offsetY += 20 / zoom;
+		offsetY -= HEIGHT / 5;
 	else if (key == GLFW_KEY_S && action == GLFW_PRESS)
-		offsetY -= 20 / zoom;
+		offsetY += HEIGHT / 5;
 
 	if (key == GLFW_KEY_KP_ADD && action == GLFW_PRESS)
 		zoom *= 2;
