@@ -115,20 +115,25 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
-		double dx = (xpos - WIDTH / 2) - offsetX;
-		double dy = (ypos - HEIGHT / 2) - offsetY;
-		offsetX = -dx;
-		offsetY = -dy;
+		// double dx = (xpos - WIDTH / 2) - offsetX;
+		// double dy = (ypos - HEIGHT / 2) - offsetY;
+		// offsetX = -dx;
+		// offsetY = -dy;
 
-		if (yoffset < 0)
+		if (yoffset < 0) {
 			zoom /= 1.2;
-		else
+			offsetY += (ypos - HEIGHT / 2) * (1 - 1.2);
+			offsetX += (xpos - WIDTH / 2) * (1 - 1.2);
+		} else {
 			zoom *= 1.2;
+			offsetY += (ypos - HEIGHT / 2) * (1 - 1 / 1.2);
+			offsetX += (xpos - WIDTH / 2) * (1 - 1 / 1.2);
+		}
 
-		dx = (xpos - WIDTH / 2) / zoom;
-		dy = (ypos - HEIGHT / 2) / zoom;
-		offsetX -= dx;
-		offsetY -= dy;
+		// dx = (xpos - WIDTH / 2) / zoom;
+		// dy = (ypos - HEIGHT / 2) / zoom;
+		// offsetX -= dx;
+		// offsetY -= dy;
 	}
 	return;
 }
