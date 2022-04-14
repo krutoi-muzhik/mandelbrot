@@ -4,7 +4,7 @@ enum DEFAULT_VALS {
 	SZX = 960,
 	SZY = 540,
 	ITERS = 200,
-	ZOOM = 1000
+	ZOOM = 10
 };
 
 int WIDTH = SZX;
@@ -15,16 +15,16 @@ double offsetX = -480.0, offsetY = 270.0;
 double posX = 0.0, posY = 0;
 size_t iterations = ITERS;
 
-#define C_re re * 100 / zoom
-#define C_im im * 100 / zoom
+#define C_re re / zoom
+#define C_im im / zoom
 
 void do_render () {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBegin(GL_POINTS);
-		for (float re = offsetX; re < offsetX + WIDTH; re ++) {
-			for (float im = offsetY; im > offsetY - HEIGHT; im --) {
+		for (ssize_t re = offsetX; re < offsetX + WIDTH; re ++) {
+			for (ssize_t im = offsetY; im > offsetY - HEIGHT; im --) {
 				float x = 0, y = 0;
 				float x_tmp = 0, y_tmp = 0;
 				size_t iter = 0;
@@ -115,25 +115,15 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
-		// double dx = (xpos - WIDTH / 2) - offsetX;
-		// double dy = (ypos - HEIGHT / 2) - offsetY;
-		// offsetX = -dx;
-		// offsetY = -dy;
-
 		if (yoffset < 0) {
 			zoom /= 1.2;
-			offsetY += (ypos - HEIGHT / 2) * (1 - 1.2);
-			offsetX += (xpos - WIDTH / 2) * (1 - 1.2);
+			offsetY += (ypos - HEIGHT / 2) * (1 - 1.2) / zoom;
+			offsetX += (xpos - WIDTH / 2) * (1 - 1.2) / zoom;
 		} else {
 			zoom *= 1.2;
-			offsetY += (ypos - HEIGHT / 2) * (1 - 1 / 1.2);
-			offsetX += (xpos - WIDTH / 2) * (1 - 1 / 1.2);
+			offsetY += (ypos - HEIGHT / 2) * (1 - 1 / 1.2) / zoom;
+			offsetX += (xpos - WIDTH / 2) * (1 - 1 / 1.2) / zoom;
 		}
-
-		// dx = (xpos - WIDTH / 2) / zoom;
-		// dy = (ypos - HEIGHT / 2) / zoom;
-		// offsetX -= dx;
-		// offsetY -= dy;
 	}
 	return;
 }

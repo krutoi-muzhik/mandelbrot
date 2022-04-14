@@ -12,10 +12,21 @@ int main () {
 	// glEnableVertexAttribArray (0);
 	// glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
+	double lastTime = glfwGetTime ();
+	size_t nFrames = 0;
+	double currentTime;
+
 	while (!glfwWindowShouldClose (window)) {
-		do_render (500);
+		do_render ();
     	glfwSwapBuffers (window);
     	glfwPollEvents ();
+    	nFrames ++;
+    	currentTime = glfwGetTime ();
+    	if (currentTime - lastTime > 1.0) {
+    		lastTime ++;
+    		printf ("fps = %ld\n", nFrames);
+    		nFrames = 0;
+    	}
 	}
 
 	glfwTerminate ();
