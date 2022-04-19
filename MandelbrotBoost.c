@@ -21,60 +21,61 @@ void do_render () {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBegin(GL_POINTS);
-		__m256d _x, _y, _cre, _cim, _x_tmp, _y_tmp, _x2, _y2, _two, _cmp_vector;
-		double x, y, cre, cim, x_tmp, y_tmp, x2, y2, two, cmp;
+		__m256d _x, _y, _cre, _cim, _x_tmp, _y_tmp, _x2, _y2, _two;
+		int _cmp;
+		// double x, y, cre, cim, x_tmp, y_tmp, x2, y2, two, cmp;
 
-		_x = _mm256_set1_pd (0.0);
-		_y = _mm256_set1_pd (0.0);
 		_two = _mm256_set1_pd (2.0);
 
-		x = 0.0;
-		y = 0.0;
-		two = 2.0;
+		// x = 0.0;
+		// y = 0.0;
+		// two = 2.0;
 
 		for (int re = offsetX; re < offsetX + WIDTH; re ++) {
 
 			_cre = _mm256_set1_pd (re / zoom);
-			cre = re / zoom;
 
 			for (int im = offsetY; im > offsetY - HEIGHT; im --) {
 				_cim = _mm256_set1_pd (im / zoom);
-				cim = im / zoom;
+
+				_x = _mm256_set1_pd (0.0);
+				_y = _mm256_set1_pd (0.0);
+				_x2 = _mm256_set1_pd (0.0);
+				_y2 = _mm256_set1_pd (0.0);
 
 				size_t iter = 0;
 
-				// while ((iter < iterations) && _mm256_movemask_pd (_cmp_vector)) {
-				// 	_x2 = _mm256_mul_pd (_x, _x);			// x * x
-				// 	_y2 = _mm256_mul_pd (_y, _y);			// y * y
+				while ((iter < iterations) && _mm256_movemask_pd (_mm256_cmp_pd (_mm256_add_pd (_x2, _y2), _two, _CMP_LE_OS))) {
+					_x2 = _mm256_mul_pd (_x, _x);			// x * x
+					_y2 = _mm256_mul_pd (_y, _y);			// y * y
 
-				// 	_x_tmp = _mm256_sub_pd (_x2, _y2);		// x_tmp = x * x - y * y
-				// 	_x_tmp = _mm256_add_pd (_x_tmp, _cre);
+					// _x_tmp = _mm256_sub_pd (_x2, _y2);		// x_tmp = x * x - y * y
+					_x_tmp = _mm256_add_pd (_mm256_sub_pd (_x2, _y2), _cre);
 
-				// 	_y_tmp = _mm256_mul_pd (_x, _y);		// y_tmp = x * y
-				// 	_y_tmp = _mm256_mul_pd (_y_tmp, _two);
-				// 	_y_tmp = _mm256_add_pd (_y_tmp, _cim);
+					// _y_tmp = _mm256_mul_pd (_x, _y);		// y_tmp = x * y
+					// _y_tmp = _mm256_mul_pd (_y_tmp, _two);
+					_y_tmp = _mm256_add_pd (_mm256_mul_pd (_mm256_mul_pd (_x, _y), _two), _cim);
 
-				// 	_x = _x_tmp;
-				// 	_y = _y_tmp;
+					_x = _x_tmp;
+					_y = _y_tmp;
 
-				// 	_cmp_vector = _mm256_cmp_pd (_mm256_add_pd (_x2, _y2), _two, _CMP_LE_OS);
-
-				// 	iter++;
-				// }
-
-				x = 0;
-				y = 0;
-				x_tmp = 0;
-				y_tmp = 0;
-
-				while ((iter < iterations) && cmp < two) {
-					x_tmp = x * x - y * y + cre;
-					y_tmp = 2 * x * y + cim;
-					x = x_tmp;
-					y = y_tmp;
-					cmp = x * x + y * y;
 					iter++;
 				}
+
+				// x = 0;
+				// y = 0;
+				// x_tmp = 0;
+				// y_tmp = 0;
+				// cmp = 0;
+
+				// while ((iter < iterations) && cmp < two) {
+				// 	x_tmp = x * x - y * y + cre;
+				// 	y_tmp = 2 * x * y + cim;
+				// 	x = x_tmp;
+				// 	y = y_tmp;
+				// 	cmp = x * x + y * y;
+				// 	iter++;
+				// }
 
 				// printf ("offsetX = %lf, offsetY = %lf\n", offsetX, offsetY);
 
