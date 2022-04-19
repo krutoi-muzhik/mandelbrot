@@ -15,8 +15,8 @@ double offsetX = -480.0, offsetY = 270.0;
 double posX = 0.0, posY = 0;
 size_t iterations = ITERS;
 
-#define C_re re / zoom
-#define C_im im / zoom
+#define cre re / zoom
+#define cim im / zoom
 
 void do_render () {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -29,8 +29,8 @@ void do_render () {
 				float x_tmp = 0, y_tmp = 0;
 				size_t iter = 0;
 				while (iter < iterations && x * x + y * y < 2) {
-					x_tmp = x * x - y * y + C_re;
-					y_tmp = 2 * x * y + C_im;
+					x_tmp = x * x - y * y + cre;
+					y_tmp = 2 * x * y + cim;
 					x = x_tmp;
 					y = y_tmp;
 					iter++;
@@ -43,7 +43,7 @@ void do_render () {
 				// printf ("x = %lf, y = %lf, iter = %d\n", re, im, iter);
 
 				float r = 0.0 + iter / (5 * iterations);
-				float g = 0.1 - iter / (3 * iterations);
+				float g = 0.5 - iter / (1.5 * iterations);
 				float b = 0.3 + iter / (1.5 * iterations);
 
 				glColor3f(r, g, b);
